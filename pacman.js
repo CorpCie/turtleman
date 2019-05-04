@@ -17,10 +17,10 @@ var GHOSTS_COLORS = {
   yellow: "#F6A00F"
 };
 var MEDUSES_COLORS = {
-  green: 'rgba(42, 145, 3, .7)',
-  pink: 'rgba(245, 176, 178, .7)',
-  red: "rgba(229, 51, 31, .7)",
-  yellow: "rgba(246, 160, 15, .7)"
+  green: '#4e843a',
+  pink: '#f9cacb',
+  red: "#e07367",
+  yellow: "#f7c167"
 };
 
 var NONE        = 4,
