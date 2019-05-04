@@ -9,6 +9,19 @@
  */
 var BACKGROUND_COLOR = "#48B4F6";
 var FONT_COLOR = "#000000";
+var PILLS_COLORS = "#073035";
+var GHOSTS_COLORS = {
+  green: "#2A9103",
+  pink: "#F5B0B2",
+  red: "#E5331F",
+  yellow: "#F6A00F"
+};
+var MEDUSES_COLORS = {
+  green: 'rgba(42, 145, 3, .7)',
+  pink: 'rgba(245, 176, 178, .7)',
+  red: "rgba(229, 51, 31, .7)",
+  yellow: "rgba(246, 160, 15, .7)"
+};
 
 var NONE        = 4,
     UP          = 3,
@@ -131,9 +144,9 @@ Pacman.Ghost = function (game, map, colour) {
     function getColour() {
         if (eatable) {
             if (secondsAgo(eatable) > 5) {
-                return game.getTick() % 20 > 10 ? "#FFFFFF" : "#0000BB";
+                return game.getTick() % 20 > 10 ? GHOSTS_COLORS[colour] : MEDUSES_COLORS[colour];
             } else {
-                return "#0000BB";
+                return MEDUSES_COLORS[colour];
             }
         } else if(eaten) {
             return "#222";
@@ -167,18 +180,23 @@ Pacman.Ghost = function (game, map, colour) {
 
         ctx.moveTo(left, base);
 
-        ctx.quadraticCurveTo(left, top, left + (s/2),  top);
-        ctx.quadraticCurveTo(left + s, top, left+s,  base);
+        if (!eatable && !eaten) {
+          var myImage = new Image();
+          myImage.src = 'ghost-' + colour + '.svg';
+          ctx.drawImage(myImage, ((position.x/10) * s), ((position.y/10) * s), s, s);
+        } else {
+          ctx.quadraticCurveTo(left, top, left + (s/2),  top);
+          ctx.quadraticCurveTo(left + s, top, left+s,  base);
 
-        // Wavy things at the bottom
-        ctx.quadraticCurveTo(tl-(inc*1), base+high, tl - (inc * 2),  base);
-        ctx.quadraticCurveTo(tl-(inc*3), base+low, tl - (inc * 4),  base);
-        ctx.quadraticCurveTo(tl-(inc*5), base+high, tl - (inc * 6),  base);
-        ctx.quadraticCurveTo(tl-(inc*7), base+low, tl - (inc * 8),  base);
-        ctx.quadraticCurveTo(tl-(inc*9), base+high, tl - (inc * 10), base);
-
+          // Wavy things at the bottom
+          ctx.quadraticCurveTo(tl-(inc*1), base+high, tl - (inc * 2),  base);
+          ctx.quadraticCurveTo(tl-(inc*3), base+low, tl - (inc * 4),  base);
+          ctx.quadraticCurveTo(tl-(inc*5), base+high, tl - (inc * 6),  base);
+          ctx.quadraticCurveTo(tl-(inc*7), base+low, tl - (inc * 8),  base);
+          ctx.quadraticCurveTo(tl-(inc*9), base+high, tl - (inc * 10), base);
+          ctx.fill();
+        }
         ctx.closePath();
-        ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = "#FFF";
@@ -588,11 +606,11 @@ Pacman.Map = function (size) {
                 if (map[i][j] === Pacman.PILL) {
                     ctx.beginPath();
 
-                    ctx.fillStyle = "#48B4F6";
+                    ctx.fillStyle = BACKGROUND_COLOR;
 		            ctx.fillRect((j * blockSize), (i * blockSize),
                                  blockSize, blockSize);
 
-                    ctx.fillStyle = "#FFF";
+                    ctx.fillStyle = PILLS_COLORS;
                     ctx.arc((j * blockSize) + blockSize / 2,
                             (i * blockSize) + blockSize / 2,
                             Math.abs(5 - (pillSize/3)),
@@ -639,7 +657,7 @@ Pacman.Map = function (size) {
                          blockSize, blockSize);
 
             if (layout === Pacman.BISCUIT) {
-                ctx.fillStyle = "#FFF";
+                ctx.fillStyle = PILLS_COLORS;
 		        ctx.fillRect((x * blockSize) + (blockSize / 2.5),
                              (y * blockSize) + (blockSize / 2.5),
                              blockSize / 6, blockSize / 6);
@@ -752,7 +770,7 @@ var PACMAN = (function () {
     var state        = WAITING,
         audio        = null,
         ghosts       = [],
-        ghostSpecs   = ["#00FFDE", "#FF0000", "#FFB8DE", "#FFB847"],
+        ghostSpecs   = ["yellow", "green", "red", "pink"],
         eatenCount   = 0,
         level        = 0,
         tick         = 0,
@@ -772,7 +790,7 @@ var PACMAN = (function () {
 
     function drawScore(text, position) {
         ctx.fillStyle = "#FFFFFF";
-        ctx.font      = "12px BDCartoonShoutRegular";
+        ctx.font      = "16px Open Sans";
         ctx.fillText(text,
                      (position["new"]["x"] / 10) * map.blockSize,
                      ((position["new"]["y"] + 5) / 10) * map.blockSize);
@@ -780,7 +798,7 @@ var PACMAN = (function () {
 
     function dialog(text) {
         ctx.fillStyle = FONT_COLOR;
-        ctx.font      = "14px BDCartoonShoutRegular";
+        ctx.font      = "14px Open Sans";
         var width = ctx.measureText(text).width,
             x     = ((map.width * map.blockSize) - width) / 2;
         ctx.fillText(text, x, (map.height * 10) + 8);
@@ -877,7 +895,7 @@ var PACMAN = (function () {
         ctx.fillText("s", 10, textBase);
 
         ctx.fillStyle = FONT_COLOR;
-        ctx.font      = "14px BDCartoonShoutRegular";
+        ctx.font      = "14px Open Sans";
         ctx.fillText("Score: " + user.theScore(), 30, textBase);
         ctx.fillText("Level: " + level, 260, textBase);
     }
@@ -945,7 +963,7 @@ var PACMAN = (function () {
         } else if (state === WAITING && stateChanged) {
             stateChanged = false;
             map.draw(ctx);
-            dialog("Press N to start a New game");
+            dialog("Appuyer N to start a New game");
         } else if (state === EATEN_PAUSE &&
                    (tick - timerStart) > (Pacman.FPS / 3)) {
             map.draw(ctx);
