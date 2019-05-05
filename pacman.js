@@ -38,7 +38,7 @@ var NONE        = 4,
     DYING       = 10,
     Pacman      = {};
 
-Pacman.FPS = 30;
+Pacman.FPS = 25;
 
 Pacman.Ghost = function (game, map, colour) {
 
@@ -357,8 +357,10 @@ Pacman.User = function (game, map) {
     function keyDown(e) {
         if (typeof keyMap[e.keyCode] !== "undefined") {
             due = keyMap[e.keyCode];
-            e.preventDefault();
-            e.stopPropagation();
+            if (e.type !== 'click') {
+               e.preventDefault();
+               e.stopPropagation();
+            }
             return false;
         }
         return true;
@@ -1079,11 +1081,11 @@ var PACMAN = (function () {
         var i, len, ghost,
             blockSize = wrapper.offsetWidth / 19,
             canvas    = document.createElement("canvas");
-console.log(blockSize);
+
         canvas.setAttribute("width", (blockSize * 19) + "px");
         canvas.setAttribute("height", (blockSize * 22) + 30 + "px");
 
-        wrapper.appendChild(canvas);
+        wrapper.prepend(canvas);
 
         ctx  = canvas.getContext('2d');
 
@@ -1132,6 +1134,35 @@ console.log(blockSize);
 
         document.addEventListener("keydown", keyDown, true);
         document.addEventListener("keypress", keyPress, true);
+
+        var controls = {
+          top: document.getElementById('top'),
+          left: document.getElementById('left'),
+          down: document.getElementById('down'),
+          right: document.getElementById('right'),
+          start: document.getElementById('start')
+        };
+
+        top.addEventListener("click", function(e) {
+          e.keyCode = 38;
+           keyDown(e);
+         }, true);
+        down.addEventListener("click", function(e) {
+         e.keyCode = 40;
+          keyDown(e);
+        }, true);
+        left.addEventListener("click", function(e) {
+          e.keyCode = 37;
+           keyDown(e);
+         }, true);
+        right.addEventListener("click", function(e) {
+         e.keyCode = 39;
+          keyDown(e);
+        }, true);
+        start.addEventListener("click", function(e) {
+         e.keyCode = 78;
+          keyDown(e);
+        }, true);
 
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
     };

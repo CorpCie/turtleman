@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name='viewport' content='width=device-width,user-scalable=no,initial-scale=1, maximum-scale=1, minimum-scale=1' />
+    <meta name='viewport' content='height=device-height,width=device-width,user-scalable=no,initial-scale=1, maximum-scale=1, minimum-scale=1' />
     <title>Justine</title>
 
     <style type="text/css">
@@ -22,6 +22,10 @@
         visibility:hidden;
       }
       body {
+        -webkit-user-select: none;  /* Chrome all / Safari all */
+        -moz-user-select: none;     /* Firefox all */
+        -ms-user-select: none;      /* IE 10+ */
+        user-select: none;          /* Likely future */
         width:100%;
         height: 100%;
         position: absolute;
@@ -41,6 +45,68 @@
       .ghost-pink { background-image: url('ghost-pink.svg');}
       .ghost-red { background-image: url('ghost-red.svg');}
       .ghost-yellow { background-image: url('ghost-yellow.svg');}
+
+      #controls {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      @media screen and (min-width: 720px) {
+        #controls {
+          display:none;
+        }
+      }
+
+      #bottom-controls {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      li {
+      	top: 66px;
+      	display: block;
+      	text-decoration: none;
+      	text-align: center;
+      	width: 60px;
+      	height: 50px;
+      	line-height: 60px;
+      	background-color: #f1f1f1;
+      	border: 1px solid #eee;
+      	border-radius: 8px;
+      	box-shadow: 0 6px 10px rgba(0,0,0,.3);
+      	animation-duration: 1.5s;
+      	animation-timing-function: linear;
+      	animation-iteration-count: infinite}
+
+      #top {
+      	margin-bottom: 5px;
+      }
+
+      #left, #down {
+        margin-right: 5px;
+      }
     </style>
   </head>
 
@@ -51,13 +117,22 @@
     <div id="shim ghost-yellow"></div>
     <div id="shim ghost-red"></div>
 
-    <div id="pacman"></div>
-    <script src="turtle.js"></script>
+    <div id="pacman">
+      <div id="controls">
+      	<div><li id="top">&#8593;</li></div>
+        <div id="bottom-controls">
+        	<li id="left">&#8592;</li>
+        	<li id="down">&#8595;</li>
+        	<li id="right">&#8594;</li>
+        </div>
+      </div>
+      <div id="start">Start</div>
+    </div>
+    <script src="polyfill.js"></script>
     <script src="pacman.js"></script>
     <script src="modernizr-1.5.min.js"></script>
 
     <script>
-
       var el = document.getElementById("pacman");
 
       var deviceWidth = window.innerWidth;
@@ -66,16 +141,15 @@
       var margin = 20;
 
       var blockSize = deviceWidth > deviceHeight ?
-        Math.ceil((deviceHeight - footerHeight - 30) / 22 ) :
-        Math.ceil(deviceWidth/19);
-console.log(blockSize, deviceWidth > deviceHeight);
+        Math.ceil((deviceHeight - footerHeight) / 23 ) :
+        Math.ceil(deviceWidth/20);
+
       var isMobile = false;
       if (deviceWidth < 720) {
         isMobile = true;
       }
 
-      el.style.width = (blockSize * 19 - margin) + 'px';
-      el.style.height = (blockSize * 22 - margin) + 'px';
+      el.style.width = (blockSize * 19 - margin - 30) + 'px';
 
       if (Modernizr.canvas && Modernizr.localstorage &&
           Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
