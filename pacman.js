@@ -7,7 +7,8 @@
  * fix what happens when a ghost is eaten (should go back to base)
  * do proper ghost mechanics (blinky/wimpy etc)
  */
-var BACKGROUND_COLOR = "#48B4F6";
+var FONT = "bold 16px Open Sans";
+var BACKGROUND_COLOR = "#B1DFFA";
 var FONT_COLOR = "#000000";
 var PILLS_COLORS = "#073035";
 var GHOSTS_COLORS = {
@@ -22,6 +23,7 @@ var MEDUSES_COLORS = {
   red: "#e07367",
   yellow: "#f7c167"
 };
+var PACMAN_COLOR = "#99B815";
 
 var NONE        = 4,
     UP          = 3,
@@ -477,6 +479,19 @@ Pacman.User = function (game, map) {
         return rem > 3 || rem < 7;
     };
 
+    function calcAngle(dir, pos) {
+        if (dir == RIGHT && (pos.x % 10 < 5)) {
+            return {"start":0.25, "end":1.75, "direction": false};
+        } else if (dir === DOWN && (pos.y % 10 < 5)) {
+            return {"start":0.75, "end":2.25, "direction": false};
+        } else if (dir === UP && (pos.y % 10 < 5)) {
+            return {"start":1.25, "end":1.75, "direction": true};
+        } else if (dir === LEFT && (pos.x % 10 < 5)) {
+            return {"start":0.75, "end":1.25, "direction": true};
+        }
+        return {"start":0, "end":2, "direction": false};
+    };
+
     function drawDead(ctx, amount) {
 
         var size = map.blockSize,
@@ -486,7 +501,7 @@ Pacman.User = function (game, map) {
             return;
         }
 
-        ctx.fillStyle = "#FFFF00";
+        ctx.fillStyle = PACMAN_COLOR;
         ctx.beginPath();
         ctx.moveTo(((position.x/10) * size) + half,
                    ((position.y/10) * size) + half);
@@ -499,11 +514,48 @@ Pacman.User = function (game, map) {
     };
 
     function draw(ctx) {
-      var s = map.blockSize;
-      var myImage = new Image();
-      myImage.src = 'turtle-' + direction + '.svg';
+      var s = map.blockSize,
+              angle = calcAngle(direction, position),
+              top  = (position.y/10) * s,
+              left = (position.x/10) * s;
+
+      ctx.fillStyle = PACMAN_COLOR;
+
       ctx.beginPath();
-      ctx.drawImage(myImage, ((position.x/10) * s), ((position.y/10) * s), s, s);
+
+      ctx.moveTo(left + s / 2, top + s / 2);
+
+      ctx.arc(left + s / 2,
+              top + s / 2,
+              s / 2, Math.PI * angle.start,
+              Math.PI * angle.end, angle.direction);
+
+      ctx.fill();
+      ctx.closePath();
+
+      ctx.beginPath();
+      ctx.fillStyle = "#FFF";
+      ctx.arc(left + 6,top + 6, s / 6, 0, 300, false);
+      ctx.arc((left + s) - 6,top + 6, s / 6, 0, 300, false);
+      ctx.closePath();
+      ctx.fill();
+
+      var f = s / 12;
+      var off = {};
+      off[RIGHT] = [f, 0];
+      off[LEFT]  = [-f, 0];
+      off[UP]    = [0, -f];
+      off[DOWN]  = [0, f];
+      off[NONE] = [f, 0];
+
+      ctx.beginPath();
+      ctx.fillStyle = "#000";
+      ctx.arc(left+6+off[direction][0], top+6+off[direction][1],
+              s / 15, 0, 300, false);
+      ctx.arc((left+s)-6+off[direction][0], top+6+off[direction][1],
+              s / 15, 0, 300, false);
+      ctx.closePath();
+      ctx.fill();
     };
 
     initUser();
@@ -554,7 +606,7 @@ Pacman.Map = function (size) {
 
         var i, j, p, line;
 
-        ctx.strokeStyle = "#f3f0d3";
+        ctx.strokeStyle = "#FFFFFF";
         ctx.lineWidth   = 5;
         ctx.lineCap     = "round";
 
@@ -790,7 +842,7 @@ var PACMAN = (function () {
 
     function drawScore(text, position) {
         ctx.fillStyle = "#FFFFFF";
-        ctx.font      = "16px Open Sans";
+        ctx.font      = FONT;
         ctx.fillText(text,
                      (position["new"]["x"] / 10) * map.blockSize,
                      ((position["new"]["y"] + 5) / 10) * map.blockSize);
@@ -798,7 +850,7 @@ var PACMAN = (function () {
 
     function dialog(text) {
         ctx.fillStyle = FONT_COLOR;
-        ctx.font      = "14px Open Sans";
+        ctx.font      = FONT;
         var width = ctx.measureText(text).width,
             x     = ((map.width * map.blockSize) - width) / 2;
         ctx.fillText(text, x, (map.height * 10) + 8);
@@ -889,13 +941,13 @@ var PACMAN = (function () {
             ctx.fill();
         }
 
-        ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
-        ctx.font = "bold 16px sans-serif";
-        //ctx.fillText("♪", 10, textBase);
-        ctx.fillText("s", 10, textBase);
+        // ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
+        // ctx.font = FONT;
+        // //ctx.fillText("♪", 10, textBase);
+        // ctx.fillText("s", 10, textBase);
 
         ctx.fillStyle = FONT_COLOR;
-        ctx.font      = "14px Open Sans";
+        ctx.font      = FONT;
         ctx.fillText("Score: " + user.theScore(), 30, textBase);
         ctx.fillText("Level: " + level, 260, textBase);
     }
@@ -1027,7 +1079,7 @@ var PACMAN = (function () {
         var i, len, ghost,
             blockSize = wrapper.offsetWidth / 19,
             canvas    = document.createElement("canvas");
-
+console.log(blockSize);
         canvas.setAttribute("width", (blockSize * 19) + "px");
         canvas.setAttribute("height", (blockSize * 22) + 30 + "px");
 
